@@ -1,0 +1,1172 @@
+<!doctype html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <title>Đặt vé Keno</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+        <script src="https://telegram.org/js/telegram-web-app.js"></script>
+        <style>
+            :root {
+                /* Aurora Gradient Colors */
+                --aurora-1: #0080ff;
+                --aurora-2: #ff1493;
+                --aurora-3: #00ffff;
+                --aurora-4: #8b5cf6;
+                
+                /* Core Colors */
+                --primary: #ef4444;
+                --primary-glow: rgba(239, 68, 68, 0.4);
+                --secondary: #3b82f6;
+                --success: #22c55e;
+                --warning: #f59e0b;
+                
+                /* Glass Colors */
+                --glass-bg: rgba(255, 255, 255, 0.08);
+                --glass-border: rgba(255, 255, 255, 0.12);
+                --glass-highlight: rgba(255, 255, 255, 0.15);
+                
+                /* Telegram Theme Fallbacks */
+                --bg: var(--tg-theme-bg-color, #0f0f1a);
+                --surface: var(--tg-theme-secondary-bg-color, #1a1a2e);
+                --text: var(--tg-theme-text-color, #f8fafc);
+                --hint: var(--tg-theme-hint-color, #94a3b8);
+                --button: var(--tg-theme-button-color, #ef4444);
+                --button-text: var(--tg-theme-button-text-color, #fff);
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                background: var(--bg);
+                color: var(--text);
+                min-height: 100vh;
+                padding: 16px;
+                padding-bottom: 100px;
+                position: relative;
+                overflow-x: hidden;
+            }
+
+            /* Aurora Background Effect */
+            body::before {
+                content: '';
+                position: fixed;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: 
+                    radial-gradient(circle at 20% 20%, rgba(0, 128, 255, 0.15) 0%, transparent 40%),
+                    radial-gradient(circle at 80% 80%, rgba(255, 20, 147, 0.12) 0%, transparent 40%),
+                    radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+                animation: auroraMove 20s ease-in-out infinite;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            @keyframes auroraMove {
+                0%, 100% { transform: translate(0, 0) rotate(0deg); }
+                33% { transform: translate(2%, 2%) rotate(1deg); }
+                66% { transform: translate(-1%, 1%) rotate(-1deg); }
+            }
+
+            /* Header Section */
+            .header {
+                text-align: center;
+                margin-bottom: 20px;
+                position: relative;
+                z-index: 1;
+            }
+
+            .header h1 {
+                font-family: 'Outfit', sans-serif;
+                font-size: 24px;
+                font-weight: 700;
+                margin-bottom: 12px;
+                background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .countdown {
+                background: linear-gradient(135deg, var(--primary) 0%, #dc2626 100%);
+                color: white;
+                padding: 10px 20px;
+                border-radius: 24px;
+                font-family: 'Outfit', sans-serif;
+                font-weight: 600;
+                font-size: 15px;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                box-shadow: 0 4px 20px var(--primary-glow);
+            }
+
+            .countdown svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            /* Glass Card */
+            .glass-card {
+                background: var(--glass-bg);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border: 1px solid var(--glass-border);
+                border-radius: 16px;
+                padding: 16px;
+                margin-bottom: 16px;
+                position: relative;
+                z-index: 1;
+            }
+
+            .glass-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+                border-radius: 16px 16px 0 0;
+            }
+
+            /* Form Row */
+            .form-row {
+                display: flex;
+                gap: 12px;
+                margin-bottom: 16px;
+                position: relative;
+                z-index: 1;
+            }
+
+            .form-group {
+                flex: 1;
+            }
+
+            .form-group label {
+                display: block;
+                font-family: 'Outfit', sans-serif;
+                font-size: 12px;
+                font-weight: 500;
+                color: var(--hint);
+                margin-bottom: 8px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .form-group select {
+                width: 100%;
+                padding: 14px 16px;
+                border-radius: 12px;
+                border: 1px solid var(--glass-border);
+                background: var(--glass-bg);
+                backdrop-filter: blur(10px);
+                color: var(--text);
+                font-family: 'Work Sans', sans-serif;
+                font-size: 14px;
+                font-weight: 500;
+                appearance: none;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 12px center;
+                background-size: 18px;
+            }
+
+            .form-group select:focus {
+                outline: none;
+                border-color: var(--secondary);
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            }
+
+            /* Ticket Rows */
+            .ticket-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 12px 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+
+            .ticket-row:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .row-label {
+                width: 28px;
+                height: 28px;
+                border-radius: 8px;
+                background: linear-gradient(135deg, var(--primary) 0%, #dc2626 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: 'Outfit', sans-serif;
+                font-weight: 700;
+                font-size: 14px;
+                color: white;
+                flex-shrink: 0;
+            }
+
+            .numbers-display {
+                flex: 1;
+                display: flex;
+                gap: 6px;
+                flex-wrap: wrap;
+                cursor: pointer;
+            }
+
+            .number-ball {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: 'Outfit', sans-serif;
+                font-size: 13px;
+                font-weight: 600;
+                transition: all 0.2s ease;
+            }
+
+            .number-ball.empty {
+                background: rgba(255, 255, 255, 0.05);
+                border: 2px dashed var(--hint);
+                color: var(--hint);
+            }
+
+            .number-ball.filled {
+                background: linear-gradient(135deg, var(--secondary) 0%, #2563eb 100%);
+                color: white;
+                box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            }
+
+            .random-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                border: none;
+                background: var(--glass-bg);
+                border: 1px solid var(--glass-border);
+                color: var(--text);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s ease;
+                flex-shrink: 0;
+            }
+
+            .random-btn:active {
+                transform: scale(0.92);
+                background: var(--secondary);
+            }
+
+            .random-btn svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            .clear-btn {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                border: none;
+                background: linear-gradient(135deg, var(--primary) 0%, #dc2626 100%);
+                color: white;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s ease;
+                flex-shrink: 0;
+                box-shadow: 0 2px 8px var(--primary-glow);
+            }
+
+            .clear-btn:active {
+                transform: scale(0.92);
+                opacity: 0.9;
+            }
+
+            .clear-btn svg {
+                width: 16px;
+                height: 16px;
+            }
+
+            .price-select {
+                width: 72px;
+                padding: 10px 8px;
+                border-radius: 10px;
+                border: 1px solid var(--glass-border);
+                background: var(--glass-bg);
+                color: var(--text);
+                font-family: 'Outfit', sans-serif;
+                font-size: 13px;
+                font-weight: 600;
+                text-align: center;
+                flex-shrink: 0;
+            }
+
+            /* Quick Select Button */
+            .quick-select-btn {
+                width: 100%;
+                padding: 16px;
+                background: linear-gradient(135deg, var(--secondary) 0%, #1d4ed8 100%);
+                border: none;
+                border-radius: 14px;
+                color: white;
+                font-family: 'Outfit', sans-serif;
+                font-size: 15px;
+                font-weight: 600;
+                cursor: pointer;
+                margin-bottom: 16px;
+                position: relative;
+                z-index: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                transition: all 0.2s ease;
+                box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+            }
+
+            .quick-select-btn:active {
+                transform: scale(0.98);
+            }
+
+            .quick-select-btn svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            /* Prize Info */
+            .prize-info h3 {
+                font-family: 'Outfit', sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+                text-align: center;
+                margin-bottom: 14px;
+                color: var(--text);
+            }
+
+            .prize-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 8px 0;
+                font-size: 13px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+            .prize-row:last-child {
+                border-bottom: none;
+            }
+
+            .prize-value {
+                color: var(--warning);
+                font-family: 'Outfit', sans-serif;
+                font-weight: 600;
+            }
+
+            /* Total Section */
+            .total-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 10px;
+                font-size: 14px;
+            }
+
+            .total-row.final {
+                font-family: 'Outfit', sans-serif;
+                font-size: 18px;
+                font-weight: 700;
+                padding-top: 12px;
+                border-top: 1px solid var(--glass-border);
+                margin-bottom: 0;
+            }
+
+            .total-amount {
+                color: var(--primary);
+                text-shadow: 0 0 20px var(--primary-glow);
+            }
+
+            /* Modal Overlay */
+            .modal-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.85);
+                backdrop-filter: blur(8px);
+                z-index: 100;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+
+            .modal-overlay.active {
+                display: flex;
+            }
+
+            .modal {
+                background: var(--surface);
+                border: 1px solid var(--glass-border);
+                border-radius: 24px;
+                padding: 24px;
+                width: 100%;
+                max-width: 360px;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+
+            .modal h3 {
+                font-family: 'Outfit', sans-serif;
+                text-align: center;
+                margin-bottom: 20px;
+                font-size: 17px;
+                font-weight: 600;
+            }
+
+            .number-grid {
+                display: grid;
+                grid-template-columns: repeat(8, 1fr);
+                gap: 6px;
+                margin-bottom: 16px;
+            }
+
+            .number-cell {
+                aspect-ratio: 1;
+                border-radius: 50%;
+                border: none;
+                background: var(--glass-bg);
+                color: var(--text);
+                font-family: 'Outfit', sans-serif;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.15s ease;
+            }
+
+            .number-cell.selected {
+                background: linear-gradient(135deg, var(--secondary) 0%, #2563eb 100%);
+                color: white;
+                box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+            }
+
+            .number-cell:disabled {
+                opacity: 0.25;
+                cursor: not-allowed;
+            }
+
+            .modal-actions {
+                display: flex;
+                gap: 12px;
+            }
+
+            .modal-btn {
+                flex: 1;
+                padding: 14px;
+                border-radius: 12px;
+                border: none;
+                font-family: 'Outfit', sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .modal-btn.cancel {
+                background: var(--glass-bg);
+                border: 1px solid var(--glass-border);
+                color: var(--text);
+            }
+
+            .modal-btn.confirm {
+                background: linear-gradient(135deg, var(--primary) 0%, #dc2626 100%);
+                color: white;
+                box-shadow: 0 4px 12px var(--primary-glow);
+            }
+
+            .modal-btn:active {
+                transform: scale(0.97);
+            }
+
+            /* Confirm Modal */
+            .order-summary {
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 14px;
+                padding: 14px;
+                margin-bottom: 20px;
+                font-size: 13px;
+            }
+
+            .summary-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 8px 0;
+            }
+
+            .summary-total {
+                font-family: 'Outfit', sans-serif;
+                font-size: 16px;
+                font-weight: 700;
+                color: var(--primary);
+                border-top: 1px solid var(--glass-border);
+                padding-top: 10px;
+                margin-top: 6px;
+            }
+
+            /* Error Message */
+            .error-msg {
+                background: rgba(239, 68, 68, 0.15);
+                border: 1px solid var(--primary);
+                border-radius: 12px;
+                padding: 14px;
+                margin-bottom: 16px;
+                text-align: center;
+                font-size: 13px;
+                display: none;
+                position: relative;
+                z-index: 1;
+            }
+
+            .error-msg.show {
+                display: block;
+                animation: shake 0.4s ease;
+            }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-6px); }
+                75% { transform: translateX(6px); }
+            }
+
+            /* Smooth scrollbar */
+            ::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: var(--glass-border);
+                border-radius: 4px;
+            }
+
+            /* Reduced motion */
+            @media (prefers-reduced-motion: reduce) {
+                body::before,
+                * {
+                    animation: none !important;
+                    transition: none !important;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Đặt vé Keno</h1>
+            <div class="countdown" id="countdown">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span id="countdownText">Còn --:--</span>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Cách chơi</label>
+                <select id="playType">
+                    <option value="1">Bậc 1 (1 số)</option>
+                    <option value="2" selected>Bậc 2 (2 số)</option>
+                    <option value="3">Bậc 3 (3 số)</option>
+                    <option value="4">Bậc 4 (4 số)</option>
+                    <option value="5">Bậc 5 (5 số)</option>
+                    <option value="6">Bậc 6 (6 số)</option>
+                    <option value="7">Bậc 7 (7 số)</option>
+                    <option value="8">Bậc 8 (8 số)</option>
+                    <option value="9">Bậc 9 (9 số)</option>
+                    <option value="10">Bậc 10 (10 số)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Kỳ quay</label>
+                <select id="drawPeriod"></select>
+            </div>
+        </div>
+
+        <div class="glass-card" id="ticketContainer">
+            <!-- Ticket rows will be generated here -->
+        </div>
+
+        <button class="quick-select-btn" id="quickSelectBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            CHỌN NHANH TẤT CẢ
+        </button>
+
+        <div class="glass-card prize-info">
+            <h3>CƠ CẤU GIẢI THƯỞNG (<span id="prizePlayType">BẬC 2</span>)</h3>
+            <div class="prize-table" id="prizeTable"></div>
+            <div style="font-size: 11px; color: var(--hint); margin-top: 10px; text-align: center;">
+                * Với mức cược 10.000đ/ 1 bộ số
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div class="total-row">
+                <span>Số vé:</span>
+                <span id="ticketCount">0</span>
+            </div>
+            <div class="total-row">
+                <span>Tiền vé:</span>
+                <span id="ticketTotal">0đ</span>
+            </div>
+            <div class="total-row">
+                <span>Phí (3%):</span>
+                <span id="feeTotal">0đ</span>
+            </div>
+            <div class="total-row final">
+                <span>Tổng cộng:</span>
+                <span class="total-amount" id="grandTotal">0đ</span>
+            </div>
+        </div>
+
+        <div class="error-msg" id="errorMsg"></div>
+
+        <!-- Number Picker Modal -->
+        <div class="modal-overlay" id="numberModal">
+            <div class="modal">
+                <h3>Chọn <span id="modalRequiredCount">2</span> số (1-80)</h3>
+                <div class="number-grid" id="numberGrid"></div>
+                <div style="text-align: center; margin-bottom: 14px; font-size: 13px; color: var(--hint);">
+                    Đã chọn: <span id="selectedCount">0</span>/<span id="requiredCount">2</span>
+                </div>
+                <div class="modal-actions">
+                    <button class="modal-btn cancel" id="cancelPickBtn">Hủy</button>
+                    <button class="modal-btn confirm" id="confirmPickBtn">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirm Modal -->
+        <div class="modal-overlay" id="confirmModal">
+            <div class="modal">
+                <h3>Xác nhận đặt vé</h3>
+                <div class="order-summary" id="orderSummary"></div>
+                <div class="modal-actions">
+                    <button class="modal-btn cancel" id="cancelOrderBtn">Hủy</button>
+                    <button class="modal-btn confirm" id="confirmOrderBtn">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Initialize Telegram Web App
+            const tg = window.Telegram.WebApp;
+            tg.expand();
+            tg.ready();
+
+            // Parse URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            const accountId = urlParams.get('accountId');
+            let periods = [];
+
+            try {
+                periods = JSON.parse(decodeURIComponent(urlParams.get('periods') || '[]'));
+            } catch (e) {
+                console.error('Failed to parse periods:', e);
+            }
+
+            // State
+            const ROWS = ['A', 'B', 'C', 'D', 'E', 'F'];
+            const PRICES = [10000, 20000, 50000, 100000, 200000, 500000];
+            let tickets = ROWS.map((label) => ({
+                label,
+                numbers: [],
+                price: 10000,
+            }));
+            let currentRowIndex = 0;
+            let selectedNumbers = [];
+            let selectedPeriod = null;
+            let countdownInterval = null;
+
+            // Prize structure by play type (multiplier * 10,000đ base bet)
+            const PRIZE_STRUCTURE = {
+                1: [{ match: 1, prize: 20000 }],
+                2: [{ match: 2, prize: 90000 }],
+                3: [
+                    { match: 2, prize: 20000 },
+                    { match: 3, prize: 200000 },
+                ],
+                4: [
+                    { match: 2, prize: 10000 },
+                    { match: 3, prize: 50000 },
+                    { match: 4, prize: 400000 },
+                ],
+                5: [
+                    { match: 3, prize: 10000 },
+                    { match: 4, prize: 150000 },
+                    { match: 5, prize: 4400000 },
+                ],
+                6: [
+                    { match: 3, prize: 10000 },
+                    { match: 4, prize: 40000 },
+                    { match: 5, prize: 450000 },
+                    { match: 6, prize: 12500000 },
+                ],
+                7: [
+                    { match: 3, prize: 10000 },
+                    { match: 4, prize: 20000 },
+                    { match: 5, prize: 100000 },
+                    { match: 6, prize: 1200000 },
+                    { match: 7, prize: 40000000 },
+                ],
+                8: [
+                    { match: 0, prize: 10000 },
+                    { match: 4, prize: 10000 },
+                    { match: 5, prize: 50000 },
+                    { match: 6, prize: 500000 },
+                    { match: 7, prize: 5000000 },
+                    { match: 8, prize: 200000000 },
+                ],
+                9: [
+                    { match: 0, prize: 10000 },
+                    { match: 4, prize: 10000 },
+                    { match: 5, prize: 30000 },
+                    { match: 6, prize: 150000 },
+                    { match: 7, prize: 1500000 },
+                    { match: 8, prize: 12000000 },
+                    { match: 9, prize: 800000000 },
+                ],
+                10: [
+                    { match: 0, prize: 10000 },
+                    { match: 5, prize: 20000 },
+                    { match: 6, prize: 80000 },
+                    { match: 7, prize: 710000 },
+                    { match: 8, prize: 8000000 },
+                    { match: 9, prize: 150000000 },
+                    { match: 10, prize: 2000000000 },
+                ],
+            };
+
+            // Initialize
+            function init() {
+                populatePeriods();
+                renderTickets();
+                renderPrizeTable();
+                setupEventListeners();
+                setupMainButton();
+                generateNumberGrid();
+            }
+
+            function populatePeriods() {
+                const select = document.getElementById('drawPeriod');
+                if (periods.length === 0) {
+                    select.innerHTML = '<option value="">Không có kỳ quay</option>';
+                    return;
+                }
+
+                select.innerHTML = periods
+                    .map((p) => {
+                        const time = p.time ? p.time.split(' ')[1]?.substring(0, 5) || '' : '';
+                        return `<option value="${p.id}">${p.id} - ${time}</option>`;
+                    })
+                    .join('');
+
+                selectedPeriod = periods[0];
+                startCountdown();
+            }
+
+            function startCountdown() {
+                if (countdownInterval) clearInterval(countdownInterval);
+
+                function updateCountdown() {
+                    if (!selectedPeriod || !selectedPeriod.time) {
+                        document.getElementById('countdownText').textContent = 'Còn --:--';
+                        return;
+                    }
+
+                    const parts = selectedPeriod.time.split(' ');
+                    const dateParts = parts[0].split('/');
+                    const timeParts = parts[1].split(':');
+                    const drawTime = new Date(
+                        parseInt(dateParts[2]),
+                        parseInt(dateParts[1]) - 1,
+                        parseInt(dateParts[0]),
+                        parseInt(timeParts[0]),
+                        parseInt(timeParts[1]),
+                        parseInt(timeParts[2] || 0),
+                    );
+
+                    const now = new Date();
+                    const diff = drawTime - now;
+
+                    if (diff <= 0) {
+                        document.getElementById('countdownText').textContent = 'Đã quay';
+                        return;
+                    }
+
+                    const minutes = Math.floor(diff / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+                    document.getElementById('countdownText').textContent = `Còn ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }
+
+                updateCountdown();
+                countdownInterval = setInterval(updateCountdown, 1000);
+            }
+
+            function renderTickets() {
+                const container = document.getElementById('ticketContainer');
+                const playType = parseInt(document.getElementById('playType').value);
+
+                container.innerHTML = tickets
+                    .map(
+                        (ticket, idx) => `
+                    <div class="ticket-row">
+                        <span class="row-label">${ticket.label}</span>
+                        <div class="numbers-display" data-row="${idx}">
+                            ${renderNumberBalls(ticket.numbers, playType)}
+                        </div>
+                        ${ticket.numbers.length > 0 ? `
+                        <button class="clear-btn" data-row="${idx}" title="Xóa">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>` : ''}
+                        <button class="random-btn" data-row="${idx}" title="Chọn ngẫu nhiên">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </button>
+                        <select class="price-select" data-row="${idx}">
+                            ${PRICES.map((p) => `<option value="${p}" ${p === ticket.price ? 'selected' : ''}>${(p / 1000).toFixed(0)}K</option>`).join('')}
+                        </select>
+                    </div>
+                `,
+                    )
+                    .join('');
+
+                updateTotals();
+            }
+
+            function renderNumberBalls(numbers, playType) {
+                const balls = [];
+                for (let i = 0; i < playType; i++) {
+                    if (numbers[i]) {
+                        balls.push(`<div class="number-ball filled">${numbers[i]}</div>`);
+                    } else {
+                        balls.push(`<div class="number-ball empty">?</div>`);
+                    }
+                }
+                return balls.join('');
+            }
+
+            function renderPrizeTable() {
+                const playType = parseInt(document.getElementById('playType').value);
+                document.getElementById('prizePlayType').textContent = `BẬC ${playType}`;
+
+                const prizes = PRIZE_STRUCTURE[playType] || [];
+                document.getElementById('prizeTable').innerHTML = prizes
+                    .map(
+                        (p) => `
+                    <div class="prize-row">
+                        <span>${p.match === 0 ? 'Không trúng số nào' : `Trúng ${p.match} số`}</span>
+                        <span class="prize-value">${p.prize.toLocaleString('vi-VN')}đ</span>
+                    </div>
+                `,
+                    )
+                    .join('');
+            }
+
+            function updateTotals() {
+                const playType = parseInt(document.getElementById('playType').value);
+                let ticketCount = 0;
+                let ticketTotal = 0;
+
+                tickets.forEach((ticket) => {
+                    if (ticket.numbers.length === playType) {
+                        ticketCount++;
+                        ticketTotal += ticket.price;
+                    }
+                });
+
+                const fee = Math.round(ticketTotal * 0.03);
+                const grandTotal = ticketTotal + fee;
+
+                document.getElementById('ticketCount').textContent = ticketCount;
+                document.getElementById('ticketTotal').textContent = ticketTotal.toLocaleString('vi-VN') + 'đ';
+                document.getElementById('feeTotal').textContent = fee.toLocaleString('vi-VN') + 'đ';
+                document.getElementById('grandTotal').textContent = grandTotal.toLocaleString('vi-VN') + 'đ';
+            }
+
+            function generateNumberGrid() {
+                const grid = document.getElementById('numberGrid');
+                let html = '';
+                for (let i = 1; i <= 80; i++) {
+                    html += `<button class="number-cell" data-num="${i}">${i}</button>`;
+                }
+                grid.innerHTML = html;
+            }
+
+            function openNumberPicker(rowIndex) {
+                currentRowIndex = rowIndex;
+                const playType = parseInt(document.getElementById('playType').value);
+                selectedNumbers = [...tickets[rowIndex].numbers];
+
+                document.getElementById('modalRequiredCount').textContent = playType;
+                document.getElementById('requiredCount').textContent = playType;
+
+                updateNumberGrid();
+                document.getElementById('numberModal').classList.add('active');
+                tg.HapticFeedback.impactOccurred('light');
+            }
+
+            function updateNumberGrid() {
+                const playType = parseInt(document.getElementById('playType').value);
+                const cells = document.querySelectorAll('.number-cell');
+
+                cells.forEach((cell) => {
+                    const num = parseInt(cell.dataset.num);
+                    cell.classList.toggle('selected', selectedNumbers.includes(num));
+                    cell.disabled = selectedNumbers.length >= playType && !selectedNumbers.includes(num);
+                });
+
+                document.getElementById('selectedCount').textContent = selectedNumbers.length;
+            }
+
+            function randomizeRow(rowIndex) {
+                const playType = parseInt(document.getElementById('playType').value);
+                const numbers = [];
+
+                while (numbers.length < playType) {
+                    const num = Math.floor(Math.random() * 80) + 1;
+                    if (!numbers.includes(num)) {
+                        numbers.push(num);
+                    }
+                }
+
+                tickets[rowIndex].numbers = numbers.sort((a, b) => a - b);
+                renderTickets();
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+
+            function randomizeAll() {
+                const playType = parseInt(document.getElementById('playType').value);
+
+                tickets.forEach((ticket) => {
+                    const numbers = [];
+                    while (numbers.length < playType) {
+                        const num = Math.floor(Math.random() * 80) + 1;
+                        if (!numbers.includes(num)) {
+                            numbers.push(num);
+                        }
+                    }
+                    ticket.numbers = numbers.sort((a, b) => a - b);
+                });
+
+                renderTickets();
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+
+            function clearRow(rowIndex) {
+                tickets[rowIndex].numbers = [];
+                renderTickets();
+                tg.HapticFeedback.notificationOccurred('warning');
+            }
+
+            function setupEventListeners() {
+                document.getElementById('playType').addEventListener('change', () => {
+                    tickets.forEach((t) => (t.numbers = []));
+                    renderTickets();
+                    renderPrizeTable();
+                });
+
+                document.getElementById('drawPeriod').addEventListener('change', (e) => {
+                    selectedPeriod = periods.find((p) => p.id === e.target.value);
+                    startCountdown();
+                });
+
+                document.getElementById('quickSelectBtn').addEventListener('click', randomizeAll);
+
+                document.getElementById('ticketContainer').addEventListener('click', (e) => {
+                    if (e.target.closest('.numbers-display')) {
+                        const row = parseInt(e.target.closest('.numbers-display').dataset.row);
+                        openNumberPicker(row);
+                    }
+
+                    if (e.target.closest('.random-btn')) {
+                        const row = parseInt(e.target.closest('.random-btn').dataset.row);
+                        randomizeRow(row);
+                    }
+
+                    if (e.target.closest('.clear-btn')) {
+                        const row = parseInt(e.target.closest('.clear-btn').dataset.row);
+                        clearRow(row);
+                    }
+                });
+
+                document.getElementById('ticketContainer').addEventListener('change', (e) => {
+                    if (e.target.classList.contains('price-select')) {
+                        const row = parseInt(e.target.dataset.row);
+                        tickets[row].price = parseInt(e.target.value);
+                        updateTotals();
+                    }
+                });
+
+                document.getElementById('numberGrid').addEventListener('click', (e) => {
+                    if (e.target.classList.contains('number-cell') && !e.target.disabled) {
+                        const num = parseInt(e.target.dataset.num);
+                        const idx = selectedNumbers.indexOf(num);
+
+                        if (idx >= 0) {
+                            selectedNumbers.splice(idx, 1);
+                        } else {
+                            selectedNumbers.push(num);
+                        }
+
+                        updateNumberGrid();
+                        tg.HapticFeedback.selectionChanged();
+                    }
+                });
+
+                document.getElementById('cancelPickBtn').addEventListener('click', () => {
+                    document.getElementById('numberModal').classList.remove('active');
+                });
+
+                document.getElementById('confirmPickBtn').addEventListener('click', () => {
+                    const playType = parseInt(document.getElementById('playType').value);
+                    if (selectedNumbers.length === playType) {
+                        tickets[currentRowIndex].numbers = selectedNumbers.sort((a, b) => a - b);
+                        document.getElementById('numberModal').classList.remove('active');
+                        renderTickets();
+                        tg.HapticFeedback.notificationOccurred('success');
+                    } else {
+                        tg.HapticFeedback.notificationOccurred('error');
+                    }
+                });
+
+                document.getElementById('cancelOrderBtn').addEventListener('click', () => {
+                    document.getElementById('confirmModal').classList.remove('active');
+                });
+
+                document.getElementById('confirmOrderBtn').addEventListener('click', submitOrder);
+            }
+
+            function setupMainButton() {
+                const mainBtn = tg.MainButton;
+                mainBtn.setText('XEM TRƯỚC ĐẶT VÉ');
+                mainBtn.color = '#ef4444';
+                mainBtn.textColor = '#ffffff';
+                mainBtn.show();
+
+                mainBtn.onClick(showConfirmModal);
+            }
+
+            function showConfirmModal() {
+                const playType = parseInt(document.getElementById('playType').value);
+                const validTickets = tickets.filter((t) => t.numbers.length === playType);
+
+                if (validTickets.length === 0) {
+                    showError('Vui lòng chọn ít nhất 1 bộ số hoàn chỉnh');
+                    tg.HapticFeedback.notificationOccurred('error');
+                    return;
+                }
+
+                if (!selectedPeriod) {
+                    showError('Vui lòng chọn kỳ quay');
+                    tg.HapticFeedback.notificationOccurred('error');
+                    return;
+                }
+
+                const ticketTotal = validTickets.reduce((sum, t) => sum + t.price, 0);
+                const fee = Math.round(ticketTotal * 0.03);
+                const grandTotal = ticketTotal + fee;
+
+                let summaryHtml = `
+                    <div class="summary-row">
+                        <span>Kỳ quay:</span>
+                        <span>${selectedPeriod.id}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Cách chơi:</span>
+                        <span>Bậc ${playType}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Số vé:</span>
+                        <span>${validTickets.length}</span>
+                    </div>
+                `;
+
+                validTickets.forEach((t) => {
+                    summaryHtml += `
+                        <div class="summary-row">
+                            <span>${t.label}: ${t.numbers.join(', ')}</span>
+                            <span>${(t.price / 1000).toFixed(0)}K</span>
+                        </div>
+                    `;
+                });
+
+                summaryHtml += `
+                    <div class="summary-row summary-total">
+                        <span>Tổng:</span>
+                        <span>${grandTotal.toLocaleString('vi-VN')}đ</span>
+                    </div>
+                `;
+
+                document.getElementById('orderSummary').innerHTML = summaryHtml;
+                document.getElementById('confirmModal').classList.add('active');
+                tg.HapticFeedback.impactOccurred('medium');
+            }
+
+            function submitOrder() {
+                const playType = parseInt(document.getElementById('playType').value);
+                const validTickets = tickets.filter((t) => t.numbers.length === playType);
+
+                const payload = {
+                    action: 'place_keno',
+                    accountId: accountId,
+                    drawId: parseInt(selectedPeriod.id),
+                    tickets: validTickets.map((t) => ({
+                        numbers: t.numbers,
+                        price: t.price,
+                    })),
+                };
+
+                tg.MainButton.showProgress();
+                tg.MainButton.disable();
+
+                tg.sendData(JSON.stringify(payload));
+
+                setTimeout(() => {
+                    tg.close();
+                }, 1000);
+            }
+
+            function showError(msg) {
+                const el = document.getElementById('errorMsg');
+                el.textContent = msg;
+                el.classList.add('show');
+                setTimeout(() => el.classList.remove('show'), 3000);
+            }
+
+            // Initialize on load
+            init();
+        </script>
+    </body>
+</html>

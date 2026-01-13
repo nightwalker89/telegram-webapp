@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Thêm tài khoản nhà cung cấp</title>
+        <script src="https://telegram.org/js/telegram-web-app.js"></script>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                padding: 20px;
+                margin: 0;
+                background-color: var(--tg-theme-bg-color, #fff);
+                color: var(--tg-theme-text-color, #000);
+                min-height: 100vh;
+            }
+            h3 {
+                margin-top: 0;
+                color: var(--tg-theme-text-color, #000);
+            }
+            .subtitle {
+                font-size: 14px;
+                color: var(--tg-theme-hint-color, #999);
+                margin-bottom: 20px;
+            }
+            .form-group {
+                margin-bottom: 16px;
+            }
+            label {
+                display: block;
+                margin-bottom: 6px;
+                font-weight: 500;
+                font-size: 14px;
+            }
+            input {
+                width: 100%;
+                padding: 12px;
+                border: 1px solid var(--tg-theme-hint-color, #ccc);
+                border-radius: 10px;
+                background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+                color: var(--tg-theme-text-color, #000);
+                font-size: 16px;
+                outline: none;
+                transition: border-color 0.2s;
+            }
+            input:focus {
+                border-color: var(--tg-theme-button-color, #007aff);
+            }
+            input::placeholder {
+                color: var(--tg-theme-hint-color, #999);
+            }
+            .error {
+                color: #ff3b30;
+                margin-top: 8px;
+                font-size: 13px;
+                display: none;
+            }
+            .info-box {
+                background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+                border-radius: 10px;
+                padding: 12px;
+                margin-top: 20px;
+                font-size: 13px;
+                color: var(--tg-theme-hint-color, #666);
+            }
+            .info-box strong {
+                color: var(--tg-theme-text-color, #000);
+            }
+            #debug-console {
+                margin-top: 30px;
+                padding: 10px;
+                background: #000;
+                color: #0f0;
+                font-family: monospace;
+                font-size: 11px;
+                border-radius: 5px;
+                word-break: break-all;
+                display: block;
+            }
+            .debug-line {
+                margin-bottom: 4px;
+                border-bottom: 1px solid #333;
+                padding-bottom: 2px;
+            }
+        </style>
+    </head>
+    <body>
+        <h3 id="form-title">🔐 Đăng nhập</h3>
+        <p id="form-subtitle" class="subtitle">Nhập số điện thoại và mật khẩu tài khoản của bạn để liên kết với bot.</p>
+
+        <div class="form-group">
+            <label>Số điện thoại</label>
+            <input type="tel" id="phone" placeholder="09xxxxxxxxx" autocomplete="tel" />
+        </div>
+
+        <div class="form-group">
+            <label>Mật khẩu</label>
+            <input type="password" id="password" placeholder="Nhập mật khẩu" autocomplete="current-password" />
+        </div>
+
+        <p id="error-msg" class="error"></p>
+
+        <div class="info-box">
+            <strong>🔒 Bảo mật:</strong> Thông tin của bạn được mã hóa và gửi trực tiếp qua Telegram. Không ai có thể xem được trong lịch sử
+            chat.
+        </div>
+
+        <div id="debug-console">
+            <div class="debug-line">--- DEBUG CONSOLE ---</div>
+            <div id="debug-content"></div>
+        </div>
+
+        <script>
+            // Initialize Telegram Web App
+            const tg = window.Telegram.WebApp;
+            tg.expand();
+            tg.ready();
+
+            function logDebug(msg) {
+                const content = document.getElementById('debug-content');
+                const line = document.createElement('div');
+                line.className = 'debug-line';
+                line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+                content.prepend(line);
+                console.log(msg);
+            }
+
+            logDebug('App Ready');
+            logDebug(`URL: ${window.location.href}`);
+            logDebug(`Search: ${window.location.search}`);
+
+            // Update UI based on provider - RUN THIS IMMEDIATELY
+            const urlParams = new URLSearchParams(window.location.search);
+            const provider = urlParams.get('provider') || 'veso247';
+            const providerName = provider.toUpperCase();
+            
+            logDebug(`Extracted provider: ${provider}`);
+            logDebug(`Provider Name: ${providerName}`);
+
+            function updateUI() {
+                const titleEl = document.getElementById('form-title');
+                const subtitleEl = document.getElementById('form-subtitle');
+                
+                if (titleEl) titleEl.textContent = `🔐 Đăng nhập ${providerName}`;
+                if (subtitleEl) subtitleEl.textContent = `Nhập số điện thoại và mật khẩu tài khoản ${providerName} của bạn để liên kết với bot.`;
+                logDebug('UI Updated');
+            }
+
+            // Run immediately in case element exists
+            updateUI();
+
+            // Also run on DOM content loaded
+            document.addEventListener('DOMContentLoaded', () => {
+                logDebug('DOMContentLoaded event');
+                updateUI();
+            });
+
+            // Configure Main Button
+            const mainBtn = tg.MainButton;
+            mainBtn.setText('LIÊN KẾT TÀI KHOẢN');
+            mainBtn.color = tg.themeParams.button_color || '#007aff';
+            mainBtn.textColor = tg.themeParams.button_text_color || '#ffffff';
+            mainBtn.show();
+
+            // Handle form submission
+            mainBtn.onClick(() => {
+                const phone = document.getElementById('phone').value.trim();
+                const password = document.getElementById('password').value;
+                const errorEl = document.getElementById('error-msg');
+
+                // Validate
+                if (!phone) {
+                    errorEl.textContent = 'Vui lòng nhập số điện thoại';
+                    errorEl.style.display = 'block';
+                    tg.HapticFeedback.notificationOccurred('error');
+                    return;
+                }
+
+                if (!password) {
+                    errorEl.textContent = 'Vui lòng nhập mật khẩu';
+                    errorEl.style.display = 'block';
+                    tg.HapticFeedback.notificationOccurred('error');
+                    return;
+                }
+
+                // Phone validation (Vietnamese format)
+                if (!/^(0|\+84|84)?[0-9]{9,10}$/.test(phone.replace(/\s/g, ''))) {
+                    errorEl.textContent = 'Số điện thoại không hợp lệ';
+                    errorEl.style.display = 'block';
+                    tg.HapticFeedback.notificationOccurred('error');
+                    return;
+                }
+
+                errorEl.style.display = 'none';
+
+                // Prepare data payload
+                const urlParams = new URLSearchParams(window.location.search);
+                const provider = urlParams.get('provider') || 'veso247';
+
+                const data = {
+                    action: 'add_account',
+                    provider: provider,
+                    phone: phone.replace(/\s/g, ''),
+                    password: password,
+                };
+
+                // Send data to bot via Telegram
+                // This closes the Web App and sends a service message to the bot
+                tg.sendData(JSON.stringify(data));
+            });
+
+            // Enable haptic feedback on input focus
+            document.querySelectorAll('input').forEach((input) => {
+                input.addEventListener('focus', () => {
+                    tg.HapticFeedback.selectionChanged();
+                });
+            });
+        </script>
+    </body>
+</html>

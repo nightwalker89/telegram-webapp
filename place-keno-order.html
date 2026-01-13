@@ -1,0 +1,1004 @@
+<!doctype html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <title>Đặt vé Keno</title>
+        <script src="https://telegram.org/js/telegram-web-app.js"></script>
+        <style>
+            :root {
+                --primary: #e74c3c;
+                --primary-dark: #c0392b;
+                --bg: var(--tg-theme-bg-color, #1a1a2e);
+                --surface: var(--tg-theme-secondary-bg-color, #16213e);
+                --text: var(--tg-theme-text-color, #eee);
+                --hint: var(--tg-theme-hint-color, #888);
+                --button: var(--tg-theme-button-color, #e74c3c);
+                --button-text: var(--tg-theme-button-text-color, #fff);
+                --success: #27ae60;
+                --warning: #f39c12;
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: var(--bg);
+                color: var(--text);
+                min-height: 100vh;
+                padding: 12px;
+                padding-bottom: 100px;
+            }
+
+            /* Header Section */
+            .header {
+                text-align: center;
+                margin-bottom: 16px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+                margin-bottom: 4px;
+            }
+
+            .countdown {
+                background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+                color: white;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-weight: 600;
+                font-size: 14px;
+                display: inline-block;
+            }
+
+            /* Dropdowns */
+            .form-row {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 16px;
+            }
+
+            .form-group {
+                flex: 1;
+            }
+
+            .form-group label {
+                display: block;
+                font-size: 12px;
+                color: var(--hint);
+                margin-bottom: 6px;
+            }
+
+            .form-group select {
+                width: 100%;
+                padding: 12px;
+                border-radius: 10px;
+                border: 1px solid var(--hint);
+                background: var(--surface);
+                color: var(--text);
+                font-size: 14px;
+                appearance: none;
+                cursor: pointer;
+            }
+
+            /* Ticket Rows */
+            .ticket-container {
+                background: var(--surface);
+                border-radius: 16px;
+                padding: 12px;
+                margin-bottom: 16px;
+            }
+
+            .ticket-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .ticket-row:last-child {
+                border-bottom: none;
+            }
+
+            .row-label {
+                min-width: 24px;
+                font-weight: 700;
+                color: var(--primary);
+                font-size: 16px;
+            }
+
+            .numbers-display {
+                flex: 1;
+                display: flex;
+                gap: 4px;
+                flex-wrap: wrap;
+            }
+
+            .number-ball {
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .number-ball.empty {
+                background: rgba(255, 255, 255, 0.1);
+                border: 2px dashed var(--hint);
+                color: var(--hint);
+            }
+
+            .number-ball.filled {
+                background: var(--primary);
+                color: white;
+            }
+
+            .random-btn {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                border: none;
+                background: rgba(255, 255, 255, 0.1);
+                color: var(--text);
+                cursor: pointer;
+                font-size: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s;
+            }
+
+            .random-btn:active {
+                transform: scale(0.9);
+                background: var(--primary);
+            }
+
+            .clear-btn {
+                width: 28px;
+                height: 28px;
+                border-radius: 6px;
+                border: none;
+                background: var(--primary);
+                color: white;
+                cursor: pointer;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s;
+            }
+
+            .clear-btn:active {
+                transform: scale(0.9);
+                opacity: 0.8;
+            }
+
+            .price-select {
+                width: 70px;
+                padding: 8px;
+                border-radius: 8px;
+                border: 1px solid var(--hint);
+                background: var(--surface);
+                color: var(--text);
+                font-size: 12px;
+                text-align: center;
+            }
+
+            /* Quick Select Button */
+            .quick-select-btn {
+                width: 100%;
+                padding: 14px;
+                background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+                border: none;
+                border-radius: 12px;
+                color: white;
+                font-size: 15px;
+                font-weight: 600;
+                cursor: pointer;
+                margin-bottom: 16px;
+                transition: transform 0.2s;
+            }
+
+            .quick-select-btn:active {
+                transform: scale(0.98);
+            }
+
+            /* Prize Info */
+            .prize-info {
+                background: var(--surface);
+                border-radius: 12px;
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .prize-info h3 {
+                font-size: 14px;
+                text-align: center;
+                margin-bottom: 12px;
+                color: var(--text);
+            }
+
+            .prize-table {
+                font-size: 13px;
+            }
+
+            .prize-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 6px 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+            .prize-row:last-child {
+                border-bottom: none;
+            }
+
+            .prize-value {
+                color: var(--warning);
+                font-weight: 600;
+            }
+
+            /* Total Section */
+            .total-section {
+                background: var(--surface);
+                border-radius: 12px;
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .total-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 8px;
+                font-size: 14px;
+            }
+
+            .total-row.final {
+                font-size: 18px;
+                font-weight: 700;
+                padding-top: 8px;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                margin-bottom: 0;
+            }
+
+            .total-amount {
+                color: var(--primary);
+            }
+
+            /* Number Picker Modal */
+            .modal-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 100;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+
+            .modal-overlay.active {
+                display: flex;
+            }
+
+            .modal {
+                background: var(--surface);
+                border-radius: 20px;
+                padding: 20px;
+                width: 100%;
+                max-width: 360px;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+
+            .modal h3 {
+                text-align: center;
+                margin-bottom: 16px;
+                font-size: 16px;
+            }
+
+            .number-grid {
+                display: grid;
+                grid-template-columns: repeat(8, 1fr);
+                gap: 6px;
+                margin-bottom: 16px;
+            }
+
+            .number-cell {
+                aspect-ratio: 1;
+                border-radius: 50%;
+                border: none;
+                background: rgba(255, 255, 255, 0.1);
+                color: var(--text);
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .number-cell.selected {
+                background: var(--primary);
+                color: white;
+            }
+
+            .number-cell:disabled {
+                opacity: 0.3;
+                cursor: not-allowed;
+            }
+
+            .modal-actions {
+                display: flex;
+                gap: 10px;
+            }
+
+            .modal-btn {
+                flex: 1;
+                padding: 12px;
+                border-radius: 10px;
+                border: none;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .modal-btn.cancel {
+                background: rgba(255, 255, 255, 0.1);
+                color: var(--text);
+            }
+
+            .modal-btn.confirm {
+                background: var(--primary);
+                color: white;
+            }
+
+            /* Confirm Modal */
+            .confirm-modal {
+                max-width: 340px;
+            }
+
+            .confirm-modal .order-summary {
+                background: rgba(0, 0, 0, 0.2);
+                border-radius: 12px;
+                padding: 12px;
+                margin-bottom: 16px;
+                font-size: 13px;
+            }
+
+            .confirm-modal .summary-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 6px 0;
+            }
+
+            .confirm-modal .summary-total {
+                font-size: 16px;
+                font-weight: 700;
+                color: var(--primary);
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                padding-top: 8px;
+                margin-top: 4px;
+            }
+
+            /* Error Message */
+            .error-msg {
+                background: rgba(231, 76, 60, 0.2);
+                border: 1px solid var(--primary);
+                border-radius: 10px;
+                padding: 12px;
+                margin-bottom: 16px;
+                text-align: center;
+                font-size: 13px;
+                display: none;
+            }
+
+            .error-msg.show {
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>🎰 Đặt vé Keno</h1>
+            <div class="countdown" id="countdown">⏱ Còn --:--</div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Cách chơi</label>
+                <select id="playType">
+                    <option value="1">Bậc 1 (1 số)</option>
+                    <option value="2" selected>Bậc 2 (2 số)</option>
+                    <option value="3">Bậc 3 (3 số)</option>
+                    <option value="4">Bậc 4 (4 số)</option>
+                    <option value="5">Bậc 5 (5 số)</option>
+                    <option value="6">Bậc 6 (6 số)</option>
+                    <option value="7">Bậc 7 (7 số)</option>
+                    <option value="8">Bậc 8 (8 số)</option>
+                    <option value="9">Bậc 9 (9 số)</option>
+                    <option value="10">Bậc 10 (10 số)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Kỳ quay</label>
+                <select id="drawPeriod"></select>
+            </div>
+        </div>
+
+        <div class="ticket-container" id="ticketContainer">
+            <!-- Ticket rows will be generated here -->
+        </div>
+
+        <button class="quick-select-btn" id="quickSelectBtn">🎲 CHỌN NHANH TẤT CẢ</button>
+
+        <div class="prize-info">
+            <h3>CƠ CẤU GIẢI THƯỞNG (<span id="prizePlayType">BẬC 2</span>)</h3>
+            <div class="prize-table" id="prizeTable">
+                <!-- Prize info will be generated here -->
+            </div>
+            <div style="font-size: 11px; color: var(--hint); margin-top: 8px; text-align: center;">
+                * Với mức cược 10.000đ/ 1 bộ số
+            </div>
+        </div>
+
+        <div class="total-section">
+            <div class="total-row">
+                <span>Số vé:</span>
+                <span id="ticketCount">0</span>
+            </div>
+            <div class="total-row">
+                <span>Tiền vé:</span>
+                <span id="ticketTotal">0đ</span>
+            </div>
+            <div class="total-row">
+                <span>Phí (3%):</span>
+                <span id="feeTotal">0đ</span>
+            </div>
+            <div class="total-row final">
+                <span>Tổng cộng:</span>
+                <span class="total-amount" id="grandTotal">0đ</span>
+            </div>
+        </div>
+
+        <div class="error-msg" id="errorMsg"></div>
+
+        <!-- Number Picker Modal -->
+        <div class="modal-overlay" id="numberModal">
+            <div class="modal">
+                <h3>Chọn <span id="modalRequiredCount">2</span> số (1-80)</h3>
+                <div class="number-grid" id="numberGrid">
+                    <!-- Numbers 1-80 will be generated -->
+                </div>
+                <div style="text-align: center; margin-bottom: 12px; font-size: 13px; color: var(--hint);">
+                    Đã chọn: <span id="selectedCount">0</span>/<span id="requiredCount">2</span>
+                </div>
+                <div class="modal-actions">
+                    <button class="modal-btn cancel" id="cancelPickBtn">Hủy</button>
+                    <button class="modal-btn confirm" id="confirmPickBtn">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirm Modal -->
+        <div class="modal-overlay" id="confirmModal">
+            <div class="modal confirm-modal">
+                <h3>🎫 Xác nhận đặt vé</h3>
+                <div class="order-summary" id="orderSummary">
+                    <!-- Order summary will be generated -->
+                </div>
+                <div class="modal-actions">
+                    <button class="modal-btn cancel" id="cancelOrderBtn">Hủy</button>
+                    <button class="modal-btn confirm" id="confirmOrderBtn">✅ Xác nhận</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Initialize Telegram Web App
+            const tg = window.Telegram.WebApp;
+            tg.expand();
+            tg.ready();
+
+            // Parse URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            const accountId = urlParams.get('accountId');
+            let periods = [];
+
+            try {
+                periods = JSON.parse(decodeURIComponent(urlParams.get('periods') || '[]'));
+            } catch (e) {
+                console.error('Failed to parse periods:', e);
+            }
+
+            // State
+            const ROWS = ['A', 'B', 'C', 'D', 'E', 'F'];
+            const PRICES = [10000, 20000, 50000, 100000, 200000, 500000];
+            let tickets = ROWS.map((label) => ({
+                label,
+                numbers: [],
+                price: 10000,
+            }));
+            let currentRowIndex = 0;
+            let selectedNumbers = [];
+            let selectedPeriod = null;
+            let countdownInterval = null;
+
+            // Prize structure by play type (multiplier * 10,000đ base bet)
+            const PRIZE_STRUCTURE = {
+                1: [{ match: 1, prize: 20000 }],
+                2: [{ match: 2, prize: 90000 }],
+                3: [
+                    { match: 2, prize: 20000 },
+                    { match: 3, prize: 200000 },
+                ],
+                4: [
+                    { match: 2, prize: 10000 },
+                    { match: 3, prize: 50000 },
+                    { match: 4, prize: 400000 },
+                ],
+                5: [
+                    { match: 3, prize: 10000 },
+                    { match: 4, prize: 150000 },
+                    { match: 5, prize: 4400000 },
+                ],
+                6: [
+                    { match: 3, prize: 10000 },
+                    { match: 4, prize: 40000 },
+                    { match: 5, prize: 450000 },
+                    { match: 6, prize: 12500000 },
+                ],
+                7: [
+                    { match: 3, prize: 10000 },
+                    { match: 4, prize: 20000 },
+                    { match: 5, prize: 100000 },
+                    { match: 6, prize: 1200000 },
+                    { match: 7, prize: 40000000 },
+                ],
+                8: [
+                    { match: 0, prize: 10000 },
+                    { match: 4, prize: 10000 },
+                    { match: 5, prize: 50000 },
+                    { match: 6, prize: 500000 },
+                    { match: 7, prize: 5000000 },
+                    { match: 8, prize: 200000000 },
+                ],
+                9: [
+                    { match: 0, prize: 10000 },
+                    { match: 4, prize: 10000 },
+                    { match: 5, prize: 30000 },
+                    { match: 6, prize: 150000 },
+                    { match: 7, prize: 1500000 },
+                    { match: 8, prize: 12000000 },
+                    { match: 9, prize: 800000000 },
+                ],
+                10: [
+                    { match: 0, prize: 10000 },
+                    { match: 5, prize: 20000 },
+                    { match: 6, prize: 80000 },
+                    { match: 7, prize: 710000 },
+                    { match: 8, prize: 8000000 },
+                    { match: 9, prize: 150000000 },
+                    { match: 10, prize: 2000000000 },
+                ],
+            };
+
+            // Initialize
+            function init() {
+                populatePeriods();
+                renderTickets();
+                renderPrizeTable();
+                setupEventListeners();
+                setupMainButton();
+                generateNumberGrid();
+            }
+
+            function populatePeriods() {
+                const select = document.getElementById('drawPeriod');
+                if (periods.length === 0) {
+                    select.innerHTML = '<option value="">Không có kỳ quay</option>';
+                    return;
+                }
+
+                select.innerHTML = periods
+                    .map((p) => {
+                        const time = p.time ? p.time.split(' ')[1]?.substring(0, 5) || '' : '';
+                        return `<option value="${p.id}">${p.id} - ${time}</option>`;
+                    })
+                    .join('');
+
+                selectedPeriod = periods[0];
+                startCountdown();
+            }
+
+            function startCountdown() {
+                if (countdownInterval) clearInterval(countdownInterval);
+
+                function updateCountdown() {
+                    if (!selectedPeriod || !selectedPeriod.time) {
+                        document.getElementById('countdown').textContent = '⏱ Còn --:--';
+                        return;
+                    }
+
+                    // Parse time (format: DD/MM/YYYY HH:mm:ss)
+                    const parts = selectedPeriod.time.split(' ');
+                    const dateParts = parts[0].split('/');
+                    const timeParts = parts[1].split(':');
+                    const drawTime = new Date(
+                        parseInt(dateParts[2]),
+                        parseInt(dateParts[1]) - 1,
+                        parseInt(dateParts[0]),
+                        parseInt(timeParts[0]),
+                        parseInt(timeParts[1]),
+                        parseInt(timeParts[2] || 0),
+                    );
+
+                    const now = new Date();
+                    const diff = drawTime - now;
+
+                    if (diff <= 0) {
+                        document.getElementById('countdown').textContent = '⏱ Đã quay';
+                        return;
+                    }
+
+                    const minutes = Math.floor(diff / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+                    document.getElementById('countdown').textContent = `⏱ Còn ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }
+
+                updateCountdown();
+                countdownInterval = setInterval(updateCountdown, 1000);
+            }
+
+            function renderTickets() {
+                const container = document.getElementById('ticketContainer');
+                const playType = parseInt(document.getElementById('playType').value);
+
+                container.innerHTML = tickets
+                    .map(
+                        (ticket, idx) => `
+                    <div class="ticket-row">
+                        <span class="row-label">${ticket.label}</span>
+                        <div class="numbers-display" data-row="${idx}">
+                            ${renderNumberBalls(ticket.numbers, playType)}
+                        </div>
+                        ${ticket.numbers.length > 0 ? `<button class="clear-btn" data-row="${idx}" title="Xóa">🗑</button>` : ''}
+                        <button class="random-btn" data-row="${idx}" title="Chọn ngẫu nhiên">🔄</button>
+                        <select class="price-select" data-row="${idx}">
+                            ${PRICES.map((p) => `<option value="${p}" ${p === ticket.price ? 'selected' : ''}>${(p / 1000).toFixed(0)}K</option>`).join('')}
+                        </select>
+                    </div>
+                `,
+                    )
+                    .join('');
+
+                updateTotals();
+            }
+
+            function renderNumberBalls(numbers, playType) {
+                const balls = [];
+                for (let i = 0; i < playType; i++) {
+                    if (numbers[i]) {
+                        balls.push(`<div class="number-ball filled">${numbers[i]}</div>`);
+                    } else {
+                        balls.push(`<div class="number-ball empty">?</div>`);
+                    }
+                }
+                return balls.join('');
+            }
+
+            function renderPrizeTable() {
+                const playType = parseInt(document.getElementById('playType').value);
+                document.getElementById('prizePlayType').textContent = `BẬC ${playType}`;
+
+                const prizes = PRIZE_STRUCTURE[playType] || [];
+                document.getElementById('prizeTable').innerHTML = prizes
+                    .map(
+                        (p) => `
+                    <div class="prize-row">
+                        <span>${p.match === 0 ? 'Không trúng số nào' : `Trúng ${p.match} số`}</span>
+                        <span class="prize-value">${p.prize.toLocaleString('vi-VN')}đ</span>
+                    </div>
+                `,
+                    )
+                    .join('');
+            }
+
+            function updateTotals() {
+                const playType = parseInt(document.getElementById('playType').value);
+                let ticketCount = 0;
+                let ticketTotal = 0;
+
+                tickets.forEach((ticket) => {
+                    if (ticket.numbers.length === playType) {
+                        ticketCount++;
+                        ticketTotal += ticket.price;
+                    }
+                });
+
+                const fee = Math.round(ticketTotal * 0.03);
+                const grandTotal = ticketTotal + fee;
+
+                document.getElementById('ticketCount').textContent = ticketCount;
+                document.getElementById('ticketTotal').textContent = ticketTotal.toLocaleString('vi-VN') + 'đ';
+                document.getElementById('feeTotal').textContent = fee.toLocaleString('vi-VN') + 'đ';
+                document.getElementById('grandTotal').textContent = grandTotal.toLocaleString('vi-VN') + 'đ';
+            }
+
+            function generateNumberGrid() {
+                const grid = document.getElementById('numberGrid');
+                let html = '';
+                for (let i = 1; i <= 80; i++) {
+                    html += `<button class="number-cell" data-num="${i}">${i}</button>`;
+                }
+                grid.innerHTML = html;
+            }
+
+            function openNumberPicker(rowIndex) {
+                currentRowIndex = rowIndex;
+                const playType = parseInt(document.getElementById('playType').value);
+                selectedNumbers = [...tickets[rowIndex].numbers];
+
+                document.getElementById('modalRequiredCount').textContent = playType;
+                document.getElementById('requiredCount').textContent = playType;
+
+                updateNumberGrid();
+                document.getElementById('numberModal').classList.add('active');
+                tg.HapticFeedback.impactOccurred('light');
+            }
+
+            function updateNumberGrid() {
+                const playType = parseInt(document.getElementById('playType').value);
+                const cells = document.querySelectorAll('.number-cell');
+
+                cells.forEach((cell) => {
+                    const num = parseInt(cell.dataset.num);
+                    cell.classList.toggle('selected', selectedNumbers.includes(num));
+                    cell.disabled = selectedNumbers.length >= playType && !selectedNumbers.includes(num);
+                });
+
+                document.getElementById('selectedCount').textContent = selectedNumbers.length;
+            }
+
+            function randomizeRow(rowIndex) {
+                const playType = parseInt(document.getElementById('playType').value);
+                const numbers = [];
+
+                while (numbers.length < playType) {
+                    const num = Math.floor(Math.random() * 80) + 1;
+                    if (!numbers.includes(num)) {
+                        numbers.push(num);
+                    }
+                }
+
+                tickets[rowIndex].numbers = numbers.sort((a, b) => a - b);
+                renderTickets();
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+
+            function randomizeAll() {
+                const playType = parseInt(document.getElementById('playType').value);
+
+                tickets.forEach((ticket) => {
+                    const numbers = [];
+                    while (numbers.length < playType) {
+                        const num = Math.floor(Math.random() * 80) + 1;
+                        if (!numbers.includes(num)) {
+                            numbers.push(num);
+                        }
+                    }
+                    ticket.numbers = numbers.sort((a, b) => a - b);
+                });
+
+                renderTickets();
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+
+            function clearRow(rowIndex) {
+                tickets[rowIndex].numbers = [];
+                renderTickets();
+                tg.HapticFeedback.notificationOccurred('warning');
+            }
+
+            function setupEventListeners() {
+                // Play type change
+                document.getElementById('playType').addEventListener('change', () => {
+                    tickets.forEach((t) => (t.numbers = []));
+                    renderTickets();
+                    renderPrizeTable();
+                });
+
+                // Period change
+                document.getElementById('drawPeriod').addEventListener('change', (e) => {
+                    selectedPeriod = periods.find((p) => p.id === e.target.value);
+                    startCountdown();
+                });
+
+                // Quick select all
+                document.getElementById('quickSelectBtn').addEventListener('click', randomizeAll);
+
+                // Ticket container events
+                document.getElementById('ticketContainer').addEventListener('click', (e) => {
+                    // Numbers display click
+                    if (e.target.closest('.numbers-display')) {
+                        const row = parseInt(e.target.closest('.numbers-display').dataset.row);
+                        openNumberPicker(row);
+                    }
+
+                    // Random button
+                    if (e.target.closest('.random-btn')) {
+                        const row = parseInt(e.target.closest('.random-btn').dataset.row);
+                        randomizeRow(row);
+                    }
+
+                    // Clear button
+                    if (e.target.closest('.clear-btn')) {
+                        const row = parseInt(e.target.closest('.clear-btn').dataset.row);
+                        clearRow(row);
+                    }
+                });
+
+                // Price select
+                document.getElementById('ticketContainer').addEventListener('change', (e) => {
+                    if (e.target.classList.contains('price-select')) {
+                        const row = parseInt(e.target.dataset.row);
+                        tickets[row].price = parseInt(e.target.value);
+                        updateTotals();
+                    }
+                });
+
+                // Number grid
+                document.getElementById('numberGrid').addEventListener('click', (e) => {
+                    if (e.target.classList.contains('number-cell') && !e.target.disabled) {
+                        const num = parseInt(e.target.dataset.num);
+                        const idx = selectedNumbers.indexOf(num);
+
+                        if (idx >= 0) {
+                            selectedNumbers.splice(idx, 1);
+                        } else {
+                            selectedNumbers.push(num);
+                        }
+
+                        updateNumberGrid();
+                        tg.HapticFeedback.selectionChanged();
+                    }
+                });
+
+                // Modal buttons
+                document.getElementById('cancelPickBtn').addEventListener('click', () => {
+                    document.getElementById('numberModal').classList.remove('active');
+                });
+
+                document.getElementById('confirmPickBtn').addEventListener('click', () => {
+                    const playType = parseInt(document.getElementById('playType').value);
+                    if (selectedNumbers.length === playType) {
+                        tickets[currentRowIndex].numbers = selectedNumbers.sort((a, b) => a - b);
+                        document.getElementById('numberModal').classList.remove('active');
+                        renderTickets();
+                        tg.HapticFeedback.notificationOccurred('success');
+                    } else {
+                        tg.HapticFeedback.notificationOccurred('error');
+                    }
+                });
+
+                // Confirm modal buttons
+                document.getElementById('cancelOrderBtn').addEventListener('click', () => {
+                    document.getElementById('confirmModal').classList.remove('active');
+                });
+
+                document.getElementById('confirmOrderBtn').addEventListener('click', submitOrder);
+            }
+
+            function setupMainButton() {
+                const mainBtn = tg.MainButton;
+                mainBtn.setText('XEM TRƯỚC ĐẶT VÉ');
+                mainBtn.color = '#e74c3c';
+                mainBtn.textColor = '#ffffff';
+                mainBtn.show();
+
+                mainBtn.onClick(showConfirmModal);
+            }
+
+            function showConfirmModal() {
+                const playType = parseInt(document.getElementById('playType').value);
+                const validTickets = tickets.filter((t) => t.numbers.length === playType);
+
+                if (validTickets.length === 0) {
+                    showError('Vui lòng chọn ít nhất 1 bộ số hoàn chỉnh');
+                    tg.HapticFeedback.notificationOccurred('error');
+                    return;
+                }
+
+                if (!selectedPeriod) {
+                    showError('Vui lòng chọn kỳ quay');
+                    tg.HapticFeedback.notificationOccurred('error');
+                    return;
+                }
+
+                const ticketTotal = validTickets.reduce((sum, t) => sum + t.price, 0);
+                const fee = Math.round(ticketTotal * 0.03);
+                const grandTotal = ticketTotal + fee;
+
+                let summaryHtml = `
+                    <div class="summary-row">
+                        <span>Kỳ quay:</span>
+                        <span>${selectedPeriod.id}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Cách chơi:</span>
+                        <span>Bậc ${playType}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Số vé:</span>
+                        <span>${validTickets.length}</span>
+                    </div>
+                `;
+
+                validTickets.forEach((t) => {
+                    summaryHtml += `
+                        <div class="summary-row">
+                            <span>${t.label}: ${t.numbers.join(', ')}</span>
+                            <span>${(t.price / 1000).toFixed(0)}K</span>
+                        </div>
+                    `;
+                });
+
+                summaryHtml += `
+                    <div class="summary-row summary-total">
+                        <span>Tổng:</span>
+                        <span>${grandTotal.toLocaleString('vi-VN')}đ</span>
+                    </div>
+                `;
+
+                document.getElementById('orderSummary').innerHTML = summaryHtml;
+                document.getElementById('confirmModal').classList.add('active');
+                tg.HapticFeedback.impactOccurred('medium');
+            }
+
+            function submitOrder() {
+                const playType = parseInt(document.getElementById('playType').value);
+                const validTickets = tickets.filter((t) => t.numbers.length === playType);
+
+                const payload = {
+                    action: 'place_keno',
+                    accountId: accountId,
+                    drawId: parseInt(selectedPeriod.id),
+                    tickets: validTickets.map((t) => ({
+                        numbers: t.numbers,
+                        price: t.price,
+                    })),
+                };
+
+                tg.MainButton.showProgress();
+                tg.MainButton.disable();
+
+                tg.sendData(JSON.stringify(payload));
+
+                setTimeout(() => {
+                    tg.close();
+                }, 1000);
+            }
+
+            function showError(msg) {
+                const el = document.getElementById('errorMsg');
+                el.textContent = msg;
+                el.classList.add('show');
+                setTimeout(() => el.classList.remove('show'), 3000);
+            }
+
+            // Initialize on load
+            init();
+        </script>
+    </body>
+</html>
